@@ -1,0 +1,135 @@
+#define BLYNK_PRINT Serial
+#define BLYNK_TEMPLATE_ID "TMPLIK8CXWcp"
+#define BLYNK_DEVICE_NAME "ButterflyProject"
+#define BLYNK_AUTH_TOKEN "7onjnaE3OwAgnvJMaE4ET51gmp7v4jMv"
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+#define led1 5 //D1
+#define led2 4 //D2
+int echo = 14; //D5
+int trig = 12; //D6
+long duration;
+int distance;
+int counter = 0;
+int currentState = 0;
+int previousState = 0;
+
+char auth[] = BLYNK_AUTH_TOKEN;
+char ssid[] = "vivo 1609";
+char pass[] = "sanzo143";
+
+void setup()
+{
+  Serial.begin(9600);
+  Blynk.begin(auth, ssid, pass);
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(trig, OUTPUT); //ultrasonic trig pin
+  pinMode(echo, INPUT); //ultrasonic echo pin
+}
+
+void blinking()
+{
+  digitalWrite(led1, HIGH);
+  delay(100);
+  digitalWrite(led1, LOW);
+  delay(100);
+  digitalWrite(led2, HIGH);
+  delay(100);
+  digitalWrite(led2, LOW);
+  delay(100);
+  digitalWrite(led1, HIGH);
+  delay(100);
+  digitalWrite(led1, LOW);
+  delay(100);
+  digitalWrite(led2, HIGH);
+  delay(100);
+  digitalWrite(led2, LOW);
+  delay(100);
+  digitalWrite(led1, HIGH);
+  delay(100);
+  digitalWrite(led1, LOW);
+  delay(100);
+  digitalWrite(led2, HIGH);
+  delay(100);
+  digitalWrite(led2, LOW);
+  delay(100);
+  digitalWrite(led1, HIGH);
+  delay(100);
+  digitalWrite(led1, LOW);
+  delay(100);
+  digitalWrite(led2, HIGH);
+  delay(100);
+  digitalWrite(led2, LOW);
+  delay(100);
+  digitalWrite(led1, HIGH);
+  delay(100);
+  digitalWrite(led1, LOW);
+  delay(100);
+  digitalWrite(led2, HIGH);
+  delay(100);
+  digitalWrite(led2, LOW);
+  delay(100);
+}
+
+void ultrasonic()
+{
+  digitalWrite(trig, LOW); //ultrasonic trig pin
+  delayMicroseconds(2);
+
+  //ultrasonic trig pin
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+
+  //ultrasonic echo pin
+  duration = pulseIn(echo, HIGH); //measure duration
+  distance = duration * 0.034 / 2; //calculate distance
+  Serial.print("Distance: ");
+  Serial.println(distance);
+}
+
+void fade()
+{
+  for (int fadeValue = 0 ; fadeValue <= 255; fadeValue += 5)
+  {
+    analogWrite(led1, fadeValue);
+    analogWrite(led2, fadeValue);
+    delay(10);
+  }
+
+  for (int fadeValue = 255 ; fadeValue >= 0; fadeValue -= 5)
+  {
+    analogWrite(led1, fadeValue);
+    analogWrite(led2, fadeValue);
+    delay(10);
+  }
+}
+
+void loop()
+{
+  ultrasonic();
+  Blynk.run();
+  Serial.println(distance);
+  if (distance < 10)
+  {
+    currentState = 1;
+    blinking();
+  }
+  else
+  {
+    currentState = 0;
+    fade();
+  }
+  delay(200);
+  if (currentState != previousState)
+  {
+    if (currentState == 1)
+    {
+      counter = counter + 1;
+      Blynk.virtualWrite(V1, counter);
+    }
+  }
+}
